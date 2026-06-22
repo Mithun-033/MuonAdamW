@@ -11,7 +11,7 @@ The optimizer also allows for different learning rates for the Muon and AdamW co
 to maintain the original learning rate or to match the RMS of AdamW updates.
 
 '''
-from typing import Literal,Iterator
+from typing import Literal
 from torch import nn
 import torch.optim as optim
 from arguments import AdamW,Muon
