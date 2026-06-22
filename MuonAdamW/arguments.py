@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class Muon:
     weight_decay : float = 1e-2
     momentum : float = 0.95
-    nesterov : bool = True,
+    nesterov : bool = True
     ns_coefficients : tuple[float, float, float] = (3.4445, -4.775, 2.0315)
     eps : float = 1e-7
     ns_steps : int =5
