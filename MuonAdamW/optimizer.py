@@ -109,6 +109,14 @@ class MuonAdamW(optim.Optimizer):
         self.adamw.load_state_dict(state_dict['adamw'])
         self.muon.load_state_dict(state_dict['muon'])
 
+    def add_param_group(self, adam_param_group=None, muon_param_group=None):
+        if adam_param_group is not None:
+            self.adamw.add_param_group(adam_param_group)
+        if muon_param_group is not None:
+            self.muon.add_param_group(muon_param_group)
+
+    
+
 
         
         
