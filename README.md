@@ -28,8 +28,8 @@ Controls how Muon's effective LR is set relative to the base `lr`:
 
 | Value | Behavior |
 |---|---|
-| `"original"` | Uses `lr` as-is |
-| `"match_rms_adamw"` | Scales to match RMS of AdamW updates |
+| `"original"` | Uses Keller's implemetation |
+| `"match_rms_adamw"` | Scales to match RMS of AdamW updates, Moonshot's implementation |
 | `float` | `muon_lr = lr × multiplier` |
 
 ---
