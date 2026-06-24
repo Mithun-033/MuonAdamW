@@ -32,6 +32,7 @@ class MuonAdamW(optim.Optimizer):
         
         assert mode in ["cnn","transformer","custom"], "Invalid mode. Supported modes are 'cnn', 'transformer', and 'custom'."
         assert muon_lr_multiplier == "original" or muon_lr_multiplier == "match_rms_adamw" or isinstance(muon_lr_multiplier, float), "Invalid muon_lr_multiplier. Supported values are 'original', 'match_rms_adamw', or a float value."
+        
         if adam_args is None:
             adam_args = AdamW()
         if muon_args is None:
@@ -122,13 +123,62 @@ class MuonAdamW(optim.Optimizer):
         self.adamw.load_state_dict(state_dict['adamw'])
         self.muon.load_state_dict(state_dict['muon'])
 
-
     
+MuonAdamW.__doc__ = r'''
+Implementation of the MuonAdamW optimizer, which combines AdamW and Muon.
 
+MuonAdamW automatically splits parameters between AdamW and Muon
+optimizers based on the selected mode:
 
+- "transformer": Embeddings, normalization layers, and output heads
+  use AdamW, while other multi-dimensional parameters use Muon.
+- "cnn": The first convolution layer uses AdamW, while other
+  multi-dimensional parameters use Muon.
+- "custom": Parameters are explicitly assigned by the user.
+
+The optimizer supports independent hyperparameter configurations
+for both AdamW and Muon, as well as optional Muon learning-rate
+scaling.
+
+Args:
+    model (nn.Module):
+        Model whose parameters will be optimized.
+
+    lr (float, optional):
+        Base learning rate. Default: 1e-3.
+
+    mode (Literal["cnn", "transformer", "custom"], optional):
+        Parameter partitioning strategy. Default: "transformer".
+
+    muon_parameters (list[nn.Parameter] | None, optional):
+        Parameters assigned to Muon when using custom mode.
+
+    adam_parameters (list[nn.Parameter] | None, optional):
+        Parameters assigned to AdamW when using custom mode.
+
+    adam_args (AdamW | None, optional):
+        AdamW configuration dataclass. If None, default values
+        from AdamW are used.
+
+    muon_args (Muon | None, optional):
+        Muon configuration dataclass. If None, default values
+        from Muon are used.
+
+    muon_lr_multiplier (Literal["original", "match_rms_adamw"] | float, optional):
+        Controls Muon's effective learning rate.
+
+        - "original": Use the base learning rate.
+        - "match_rms_adamw": Match AdamW update RMS.
+        - float: Scale Muon learning rate by the given factor.
+
+Raises:
+    AssertionError:
+        If mode or muon_lr_multiplier is invalid.
+
+    ValueError:
+        If custom mode is selected without providing both
+        muon_parameters and adam_parameters.
+'''
         
-        
-
-
-        
-
+if __name__ == "__main__":
+    print(MuonAdamW.__doc__)
