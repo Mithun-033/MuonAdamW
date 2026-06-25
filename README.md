@@ -16,7 +16,7 @@ Muon excels at optimizing weight matrices via orthogonalized Nesterov momentum, 
 
 | Mode | AdamW gets | Muon gets |
 |---|---|---|
-|`general` | params with dim < 1 | params with dim > 1 |
+|`general` | params with dim = 1 | params with dim > 1 |
 | `transformer` | Embeddings, LayerNorms, biases, final projection heads | All other `dim > 1` weight matrices |
 | `cnn` | First conv layer, heads, biases | All other `dim > 1` weight matrices |
 | `custom` | Explicitly passed list | Explicitly passed list |
