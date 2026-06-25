@@ -1,5 +1,5 @@
 import torch.optim as optim
-from arguments import AdamW, Muon
+from .arguments import AdamW, Muon
 
 def make_adamw(lr : float, adam_parameters : list, config : AdamW):
     '''Helper function to create an AdamW optimizer with the specified parameters and configuration.

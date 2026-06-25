@@ -14,8 +14,8 @@ to maintain the original learning rate or to match the RMS of AdamW updates.
 from typing import Literal
 from torch import nn
 import torch.optim as optim
-from arguments import AdamW,Muon
-from helper_utils import make_adamw, make_muon
+from .arguments import AdamW,Muon
+from .helper_utils import make_adamw, make_muon
 
 class MuonAdamW(optim.Optimizer):
     '''Optimizer that combines AdamW and Muon optimizers.'''
@@ -53,12 +53,11 @@ class MuonAdamW(optim.Optimizer):
             self.adamw_params = adam_parameters
 
         elif self.mode == "general":
-            for module in model.modules():
-                for name, param in module.named_parameters():
-                    if param.dim() > 1:
-                        self.muon_params.append(param)
-                    else:
-                        self.adamw_params.append(param)
+            for param in model.parameters():
+                if param.dim() > 1:
+                    self.muon_params.append(param)
+                else:
+                    self.adamw_params.append(param)
         
         elif self.mode == "transformer":
             for module in model.modules():
