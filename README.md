@@ -56,9 +56,9 @@ optimizer.load_state_dict(torch.load("checkpoint.pt"))
 ---
 
 ## Roadmap
-- [✅] state_dict/load_state_dict functionality added and tested
-- [✅] docs added
-- [✅] General mode tested and benchmarked
+- [x] state_dict/load_state_dict functionality added and tested
+- [x] docs added
+- [x] General mode tested and benchmarked
 - [ ] Fix parameter deduplication in `transformer` / `cnn` modes
 - [ ] LR scheduler compatibility shim
 - [ ] PyPI release
