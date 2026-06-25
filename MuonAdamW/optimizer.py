@@ -22,7 +22,7 @@ class MuonAdamW(optim.Optimizer):
     def __init__(self,
                 model : nn.Module,
                 lr : float = 1e-3,
-                mode : Literal["cnn","transformer","custom"]="transformer",
+                mode : Literal["general","cnn","transformer","custom"]="general",
                 muon_parameters : list[nn.Parameter] | None = None,
                 adam_parameters : list[nn.Parameter] | None = None,
                 adam_args : AdamW | None = None,
@@ -30,8 +30,9 @@ class MuonAdamW(optim.Optimizer):
                 muon_lr_multiplier : Literal["original","match_rms_adamw"] | float = "original",
                 ):
         
-        assert mode in ["cnn","transformer","custom"], "Invalid mode. Supported modes are 'cnn', 'transformer', and 'custom'."
+        assert mode in ["general","cnn","transformer","custom"], "Invalid mode. Supported modes are 'general', 'cnn', 'transformer', and 'custom'."
         assert muon_lr_multiplier == "original" or muon_lr_multiplier == "match_rms_adamw" or isinstance(muon_lr_multiplier, float), "Invalid muon_lr_multiplier. Supported values are 'original', 'match_rms_adamw', or a float value."
+        assert isinstance(model, nn.Module), "The model must be an instance of torch.nn.Module."
         
         if adam_args is None:
             adam_args = AdamW()
@@ -50,6 +51,14 @@ class MuonAdamW(optim.Optimizer):
                 raise ValueError("For custom mode, both muon_parameters and adam_parameters must be provided in a list format.")
             self.muon_params = muon_parameters
             self.adamw_params = adam_parameters
+
+        elif self.mode == "general":
+            for module in model.modules():
+                for name, param in module.named_parameters():
+                    if param.dim() > 1:
+                        self.muon_params.append(param)
+                    else:
+                        self.adamw_params.append(param)
         
         elif self.mode == "transformer":
             for module in model.modules():
@@ -130,6 +139,7 @@ Implementation of the MuonAdamW optimizer, which combines AdamW and Muon.
 MuonAdamW automatically splits parameters between AdamW and Muon
 optimizers based on the selected mode:
 
+- "general": All multi-dimensional parameters use Muon, while other parameters use AdamW.
 - "transformer": Embeddings, normalization layers, and output heads
   use AdamW, while other multi-dimensional parameters use Muon.
 - "cnn": The first convolution layer uses AdamW, while other
@@ -147,7 +157,7 @@ Args:
     lr (float, optional):
         Base learning rate. Default: 1e-3.
 
-    mode (Literal["cnn", "transformer", "custom"], optional):
+    mode (Literal["general", "cnn", "transformer", "custom"], optional):
         Parameter partitioning strategy. Default: "transformer".
 
     muon_parameters (list[nn.Parameter] | None, optional):
