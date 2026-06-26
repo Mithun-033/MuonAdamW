@@ -1,5 +1,6 @@
 import unittest
 from torch import nn
+import torch
 
 from MuonAdamW.optimizer import MuonAdamW
 from MuonAdamW.arguments import AdamW, Muon
@@ -48,6 +49,33 @@ class TestMuonAdamW(unittest.TestCase):
         self.assertGreater(len(optimizer.adamw_params), 0)
         self.assertGreater(len(optimizer.muon_params), 0)
 
+    def test_scheduler_integration(self):
+        model = nn.Linear(10, 1)
+        optimizer = MuonAdamW(model)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
+        self.assertIsInstance(scheduler, torch.optim.lr_scheduler.CosineAnnealingLR)
+
+
+    def test_scheduler_step(self):
+        model = nn.Linear(10, 1)
+        optimizer = MuonAdamW(model, muon_lr_multiplier="match_rms_adamw")
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
+        
+        initial_adamw_lr = optimizer.param_groups[0]['  lr']
+        initial_muon_lr = optimizer.param_groups[1]['lr']   
+
+        optimizer.step()
+        scheduler.step()
+        optimizer.zero_grad()
+
+        updated_adamw_lr = optimizer.param_groups[0]['lr']
+        updated_muon_lr = optimizer.param_groups[1]['lr']
+
+        self.assertNotEqual(initial_adamw_lr, updated_adamw_lr)
+        self.assertNotEqual(initial_muon_lr, updated_muon_lr)
+
+        print(f"Initial AdamW LR: {initial_adamw_lr}, Updated AdamW LR: {updated_adamw_lr}")
+        print(f"Initial (pre-scaled) Muon LR: {initial_muon_lr}, Updated (pre-scaled) Muon LR: {updated_muon_lr}")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
