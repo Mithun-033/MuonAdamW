@@ -96,11 +96,13 @@ class MuonAdamW(optim.Optimizer):
         param_groups = [
             {
                 "params": self.adamw_params,
-                "optimizer": "adamw"
+                "optimizer": "adamw",
+                "lr" : lr
             },
             {
                 "params": self.muon_params,
-                "optimizer": "muon"
+                "optimizer": "muon",
+                "lr" : lr * (muon_lr_multiplier if isinstance(muon_lr_multiplier, float) else 1.0)
             }
         ]
         defaults = {
