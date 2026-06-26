@@ -31,7 +31,7 @@ Controls how Muon's effective LR is set relative to the base `lr`:
 |---|---|
 | `"original"` | Uses Keller's implemetation |
 | `"match_rms_adamw"` | Scales to match RMS of AdamW updates, Moonshot's implementation |
-| `float` | `muon_lr = lr × multiplier` |
+| `float` | `muon_lr = lr × multiplier` (not recommended) |
 
 ---
 
