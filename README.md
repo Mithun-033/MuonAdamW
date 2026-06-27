@@ -31,7 +31,7 @@ Controls how Muon's effective LR is set relative to the base `lr`:
 |---|---|
 | `"original"` | Uses Keller's implemetation |
 | `"match_rms_adamw"` | Scales to match RMS of AdamW updates, Moonshot's implementation |
-| `float` | `muon_lr = lr × multiplier` |
+| `float` | `muon_lr = lr × multiplier` (not recommended) |
 
 ---
 
@@ -60,7 +60,7 @@ optimizer.load_state_dict(torch.load("checkpoint.pt"))
 - [x] docs added
 - [x] General mode tested and benchmarked
 - [ ] Fix parameter deduplication in `transformer` / `cnn` modes
-- [ ] LR scheduler compatibility shim
+- [x] LR scheduler compatibility shim
 - [ ] PyPI release
 
 
