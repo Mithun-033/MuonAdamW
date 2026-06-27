@@ -15,7 +15,7 @@ class Model(nn.Module):
         super().__init__()
 
         self.model=nn.Sequential(
-            nn.Linear(1,64),
+            nn.Linear(16,64),
             nn.ReLU(),
 
             nn.LayerNorm(64),
@@ -38,24 +38,43 @@ class Model(nn.Module):
             nn.Linear(64,1)
         )
 
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            nn.init.xavier_uniform_(module.weight)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.LayerNorm):
+            nn.init.ones_(module.weight)
+            nn.init.zeros_(module.bias)
+
     def forward(self,x):
         return self.model(x)
 
 
 # Dataset
-inputs=(torch.randn(50_000,1)).float()
+inputs=torch.randn(50_000,16)
+
+x=inputs
+
 targets=(
-    inputs**3
-    -inputs**2
-    +inputs*1.5
-    -inputs*0.5
-    -torch.cos(inputs)**2
-    +torch.sin(inputs)**2
-    +torch.randn(50_000,1)*0.1
-) 
+    x[:,0]**2
+    +torch.sin(3*x[:,1])
+    +x[:,2]*x[:,3]
+    -torch.exp(-x[:,4]**2)
+    +torch.cos(x[:,5]*x[:,6])
+    +torch.log1p(x[:,7].abs())
+    +torch.tanh(x[:,8]-x[:,9])
+    +0.5*x[:,10]**3
+    -0.3*x[:,11]*x[:,12]*x[:,13]
+    +torch.sin(x[:,14]+x[:,15])
+    +0.2*torch.randn(50_000)
+).unsqueeze(1)
 
 inputs = (inputs - inputs.mean()) / inputs.std()
 targets = (targets - targets.mean()) / targets.std()
+
 
 loader=DataLoader(
     TensorDataset(inputs,targets),
@@ -66,6 +85,8 @@ loader=DataLoader(
 
 model1=Model().to(device)
 model2=Model().to(device)
+
+model1.load_state_dict(model2.state_dict())
 
 learning_rate=1e-9
 
