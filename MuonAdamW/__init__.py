@@ -6,7 +6,7 @@ The optimizer allows users to specify which parameters should be optimized with 
 providing flexibility in how the parameters are optimized.
 '''
 
-from . import arguments
+from . arguments import AdamwArgs, MuonArgs
 from . optimizer import MuonAdamW
 from . helper_utils import make_adamw, make_muon
 

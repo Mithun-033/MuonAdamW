@@ -1,12 +1,12 @@
 import torch.optim as optim
-from .arguments import AdamW, Muon
+from .arguments import AdamwArgs, MuonArgs
 
-def make_adamw(lr : float, adam_parameters : list, config : AdamW):
+def make_adamw(lr : float, adam_parameters : list, config : AdamwArgs):
     '''Helper function to create an AdamW optimizer with the specified parameters and configuration.
     Args:
         lr (float): Learning rate for the AdamW optimizer.
         adam_parameters (list): List of parameters to be optimized by AdamW.
-        config (AdamW): Configuration object containing AdamW hyperparameters.
+        config (AdamwArgs): Configuration object containing AdamW hyperparameters.
     Returns:
         torch.optim.AdamW: An instance of the AdamW optimizer initialized with the provided parameters and configuration.
     '''
@@ -26,14 +26,14 @@ def make_adamw(lr : float, adam_parameters : list, config : AdamW):
 
     return optimizer
 
-def make_muon(lr : float, muon_parameters : list, muon_lr_multiplier : float | str, config : Muon):
+def make_muon(lr : float, muon_parameters : list, muon_lr_multiplier : float | str, config : MuonArgs):
     '''Helper function to create a Muon optimizer with the specified parameters and configuration.
     Args:
         lr (float): Base learning rate for the Muon optimizer.
         muon_parameters (list): List of parameters to be optimized by Muon.
         muon_lr_multiplier (float | str): Multiplier for the learning rate of the Muon optimizer. 
             Can be a float value or a string indicating whether to use the original learning rate or to match the RMS of AdamW updates.
-        config (Muon): Configuration object containing Muon hyperparameters.
+        config (MuonArgs): Configuration object containing Muon hyperparameters.
     Returns:
         torch.optim.Muon: An instance of the Muon optimizer initialized with the provided parameters and configuration.
     '''

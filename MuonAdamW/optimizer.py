@@ -14,7 +14,7 @@ to maintain the original learning rate or to match the RMS of AdamW updates.
 from typing import Literal
 from torch import nn
 import torch.optim as optim
-from .arguments import AdamW,Muon
+from .arguments import AdamwArgs,MuonArgs
 from .helper_utils import make_adamw, make_muon
 
 class MuonAdamW(optim.Optimizer):
@@ -22,24 +22,23 @@ class MuonAdamW(optim.Optimizer):
     def __init__(self,
                 model : nn.Module,
                 lr : float = 1e-3,
-                mode : Literal["general","cnn","transformer","custom"]="general",
+                mode : Literal["general","transformer","custom"]="general",
                 muon_parameters : list[nn.Parameter] | None = None,
                 adam_parameters : list[nn.Parameter] | None = None,
-                adam_args : AdamW | None = None,
-                muon_args : Muon | None = None,
+                adam_args : AdamwArgs | None = None,
+                muon_args : MuonArgs | None = None,
                 muon_lr_multiplier : Literal["original","match_rms_adamw"] | float = "original",
                 ):
         
-        assert mode in ["general","cnn","transformer","custom"], "Invalid mode. Supported modes are 'general', 'cnn', 'transformer', and 'custom'."
+        assert mode in ["general","transformer","custom"], "Invalid mode. Supported modes are 'general', 'transformer', and 'custom'."
         assert muon_lr_multiplier == "original" or muon_lr_multiplier == "match_rms_adamw" or isinstance(muon_lr_multiplier, float), "Invalid muon_lr_multiplier. Supported values are 'original', 'match_rms_adamw', or a float value."
         assert isinstance(model, nn.Module), "The model must be an instance of torch.nn.Module."
         
         if adam_args is None:
-            adam_args = AdamW()
+            adam_args = AdamwArgs()
         if muon_args is None:
-            muon_args = Muon()
+            muon_args = MuonArgs()
 
-        self.adamw_linear=set(["lm_head","final_head","classifier","head"])
         self.mode = mode
         self.muon_lr_multiplier = muon_lr_multiplier  
 
@@ -60,38 +59,22 @@ class MuonAdamW(optim.Optimizer):
                     self.adamw_params.append(param)
         
         elif self.mode == "transformer":
+            seen = set()
             for module in model.modules():
-                if isinstance(module, (nn.Embedding, nn.LayerNorm)):
-                    self.adamw_params.extend(list(module.parameters()))
-                else:
-                    for name, param in module.named_parameters():
-                        # A heuristic to identify final projection layers in transformers, 
-                        # which are typically linear layers. This is not a foolproof method and 
-                        # may need adjustments based on the specific model architecture.
-                        if name in self.adamw_linear: 
+                if isinstance(module, (nn.Embedding, nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)):
+                    for param in module.parameters():
+                        if id(param) not in seen:
                             self.adamw_params.append(param)
-                            continue
-                        if param.dim() > 1:
+                            seen.add(id(param))
+                
+                for param in module.parameters(recurse = False):
+                    if id(param) not in seen:
+                        if param.dim() > 1: 
                             self.muon_params.append(param)
                         else:
                             self.adamw_params.append(param)
-
-        elif self.mode == "cnn":
-            flag = True
-            for module in model.modules():
-                if flag and isinstance(module, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
-                    self.adamw_params.extend(list(module.parameters()))
-                    flag = False
-                    continue
-
-                for name, param in module.named_parameters():
-                    if name in self.adamw_linear: 
-                        self.adamw_params.append(param)
-                        continue
-                    if param.dim() > 1:
-                        self.muon_params.append(param)
-                    else:
-                        self.adamw_params.append(param)
+                        seen.add(id(param))
+                
 
         param_groups = [
             {
@@ -143,8 +126,6 @@ optimizers based on the selected mode:
 - "general": All multi-dimensional parameters use Muon, while other parameters use AdamW.
 - "transformer": Embeddings, normalization layers, and output heads
   use AdamW, while other multi-dimensional parameters use Muon.
-- "cnn": The first convolution layer uses AdamW, while other
-  multi-dimensional parameters use Muon.
 - "custom": Parameters are explicitly assigned by the user.
 
 The optimizer supports independent hyperparameter configurations
@@ -158,7 +139,7 @@ Args:
     lr (float, optional):
         Base learning rate. Default: 1e-3.
 
-    mode (Literal["general", "cnn", "transformer", "custom"], optional):
+    mode (Literal["general", "transformer", "custom"], optional):
         Parameter partitioning strategy. Default: "transformer".
 
     muon_parameters (list[nn.Parameter] | None, optional):
@@ -167,11 +148,11 @@ Args:
     adam_parameters (list[nn.Parameter] | None, optional):
         Parameters assigned to AdamW when using custom mode.
 
-    adam_args (AdamW | None, optional):
+    adam_args (AdamWArgs | None, optional):
         AdamW configuration dataclass. If None, default values
         from AdamW are used.
 
-    muon_args (Muon | None, optional):
+    muon_args (MuonArgs | None, optional):
         Muon configuration dataclass. If None, default values
         from Muon are used.
 

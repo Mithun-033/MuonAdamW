@@ -1,7 +1,7 @@
 from dataclasses import dataclass 
 
 @dataclass
-class Muon:
+class MuonArgs:
     weight_decay : float = 1e-2
     momentum : float = 0.95
     nesterov : bool = True
@@ -10,7 +10,7 @@ class Muon:
     ns_steps : int = 5
 
 @dataclass
-class AdamW:
+class AdamwArgs:
     betas : tuple[float, float] = (0.9,0.99)
     eps : float = 1e-8
     weight_decay : float = 0.1
