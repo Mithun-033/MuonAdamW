@@ -1,14 +1,17 @@
 '''
-This module implements the MuonAdamW optimizer, which combines the AdamW and Muon optimization algorithms.
-The MuonAdamW optimizer allows for flexible configuration of both AdamW and Muon components,
-enabling users to tailor the optimization process to their specific needs. The optimizer supports three modes of operation:
-1. Shape-wise: Parameters are categorized based on their shape, with multi-dimensional parameters optimized using
-   Muon and one-dimensional parameters optimized using AdamW.
-2. Role-wise: Parameters are categorized based on their role in the model. Embeddings, Norms are optimized using AdamW, 
-    while all other 2d parameters are optimized using Muon.
-3. Custom: Users can explicitly specify which parameters should be optimized with Muon and which with AdamW.
-The optimizer also allows for different learning rates for the Muon and AdamW components, with options
-to maintain the original learning rate or to match the RMS of AdamW updates.
+This module implements the MuonAdamW optimizer, which combines the AdamW and Muon optimizers. 
+It provides a flexible interface for parameter partitioning and supports independent hyperparameter 
+configurations for both optimizers.
+Modes :-
+    general :-
+        In this mode, all multi-dimensional parameters (e.g., weights of linear layers) are optimized using Muon,
+        while all other parameters (e.g., biases, LayerNorm weights) are optimized using AdamW.
+    transformer :-
+        In this mode, embeddings, normalization layers, and output heads (if weights are tied) are optimized using AdamW,
+        while all other multi-dimensional parameters are optimized using Muon.
+    custom :-
+        In this mode, the user explicitly specifies which parameters are optimized using Muon and which are optimized using AdamW.
+        The user must provide two lists of parameters: one for Muon and one for AdamW.
 
 '''
 from typing import Literal
@@ -113,10 +116,12 @@ class MuonAdamW(optim.Optimizer):
         }
     
     def load_state_dict(self, state_dict):
+        assert 'adamw' in state_dict and 'muon' in state_dict, "State dict must contain both 'adamw' and 'muon' keys."
         self.adamw.load_state_dict(state_dict['adamw'])
         self.muon.load_state_dict(state_dict['muon'])
 
     def add_param_group(self, param_group):
+        assert "muon" in param_group and "adamw" in param_group, "Param group must contain both 'muon' and 'adamw' keys."
         self.muon.add_param_group(param_group["muon"])
         self.adamw.add_param_group(param_group["adamw"])
 
