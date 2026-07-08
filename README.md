@@ -17,7 +17,7 @@ Muon excels at optimizing weight matrices via orthogonalized Nesterov momentum, 
 | Mode | AdamW gets | Muon gets |
 |---|---|---|
 |`general` | params with dim = 1 | params with dim > 1 |
-| `transformer` | Embeddings, LayerNorms, biases, final projection heads | All other `dim > 1` weight matrices |
+| `transformer` | Embeddings, LayerNorms, biases, final projection heads | All other `dim > 1` weight matrices |p
 | `custom` | Explicitly passed list | Explicitly passed list |
 
 ---
@@ -58,7 +58,7 @@ optimizer.load_state_dict(torch.load("checkpoint.pt"))
 - [x] state_dict/load_state_dict functionality added and tested
 - [x] docs added
 - [x] General mode tested and benchmarked
-- [ ] Fix parameter deduplication in `transformer` / `cnn` modes
+- [x] Fix parameter deduplication in `transformer` 
 - [x] LR scheduler compatibility shim
 - [ ] PyPI release
 
