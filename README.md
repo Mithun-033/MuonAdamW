@@ -12,7 +12,7 @@ A hybrid optimizer that combines [Muon](https://github.com/KellerJordan/Muon) an
 from MuonAdamW import MuonAdamW, MuonArgs, AdamwArgs
 
 adamw_args = AdamwArgs(
-    weight_decay = 0.05,
+    weight_decay = 0.05,    # Change any default args of respective optimizer
     eps = 1e-8
 )
 muon_args = MuonArgs(
@@ -20,9 +20,9 @@ muon_args = MuonArgs(
     momentum = 0.8
 )
 optimizer = MuonAdamW(
-    model,         # pass the model not the iterator
+    model,                  # Pass the model, not the iterator
     lr = learning_rate,
-    mode = "transformer",
+    mode = "transformer",   # Choose the mode for parameter split
     adamw_args = adamw_args,
     muon_args = muon_args
 )
