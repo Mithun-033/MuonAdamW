@@ -6,6 +6,29 @@ A hybrid optimizer that combines [Muon](https://github.com/KellerJordan/Muon) an
 
 ---
 
+## Optimizer definition
+'''python
+
+from MuonAdamW import MuonAdamW, MuonArgs, AdamwArgs
+
+adamw_args = AdamwArgs(
+    weight_decay = 0.05,
+    eps = 1e-8
+)
+muon_args = MuonArgs(
+    ns_steps = 6,
+    momentum = 0.8
+)
+optimizer = MuonAdamW(
+    model,         # pass the model not the iterator
+    lr = learning_rate,
+    mode = "transformer",
+    adamw_args = adamw_args,
+    muon_args = muon_args
+)
+
+'''
+
 ## Motivation
 
 Muon excels at optimizing weight matrices via orthogonalized Nesterov momentum, while AdamW remains the go-to for embeddings, norms, and biases. Splitting parameters manually every run is tedious. MuonAdamW does it for you.
