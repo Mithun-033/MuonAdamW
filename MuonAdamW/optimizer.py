@@ -27,8 +27,8 @@ class MuonAdamW(optim.Optimizer):
                 lr : float = 1e-3,
                 mode : Literal["general","transformer","custom"]="general",
                 muon_parameters : list[nn.Parameter] | None = None,
-                adam_parameters : list[nn.Parameter] | None = None,
-                adam_args : AdamwArgs | None = None,
+                adamw_parameters : list[nn.Parameter] | None = None,
+                adamw_args : AdamwArgs | None = None,
                 muon_args : MuonArgs | None = None,
                 muon_lr_multiplier : Literal["original","match_rms_adamw"] | float = "original",
                 ):
@@ -37,8 +37,8 @@ class MuonAdamW(optim.Optimizer):
         assert muon_lr_multiplier == "original" or muon_lr_multiplier == "match_rms_adamw" or isinstance(muon_lr_multiplier, float), "Invalid muon_lr_multiplier. Supported values are 'original', 'match_rms_adamw', or a float value."
         assert isinstance(model, nn.Module), "The model must be an instance of torch.nn.Module."
         
-        if adam_args is None:
-            adam_args = AdamwArgs()
+        if adamw_args is None:
+            adamw_args = AdamwArgs()
         if muon_args is None:
             muon_args = MuonArgs()
 
@@ -49,10 +49,10 @@ class MuonAdamW(optim.Optimizer):
         self.adamw_params = []
         
         if self.mode == "custom":
-            if muon_parameters is None or adam_parameters is None:
-                raise ValueError("For custom mode, both muon_parameters and adam_parameters must be provided in a list format.")
+            if muon_parameters is None or adamw_parameters is None:
+                raise ValueError("For custom mode, both muon_parameters and adamw_parameters must be provided in a list format.")
             self.muon_params = muon_parameters
-            self.adamw_params = adam_parameters
+            self.adamw_params = adamw_parameters
 
         elif self.mode == "general":
             for param in model.parameters():
@@ -92,11 +92,11 @@ class MuonAdamW(optim.Optimizer):
             }
         ]
         defaults = {
-            "adamw": adam_args,
+            "adamw": adamw_args,
             "muon": muon_args
         }
 
-        self.adamw= make_adamw(lr, self.adamw_params, adam_args)
+        self.adamw= make_adamw(lr, self.adamw_params, adamw_args)
         self.muon = make_muon(lr, self.muon_params, muon_lr_multiplier, muon_args)
 
         super().__init__(param_groups, defaults)
@@ -153,10 +153,10 @@ Args:
     muon_parameters (list[nn.Parameter] | None, optional):
         Parameters assigned to Muon when using custom mode.
 
-    adam_parameters (list[nn.Parameter] | None, optional):
+    adamw_parameters (list[nn.Parameter] | None, optional):
         Parameters assigned to AdamW when using custom mode.
 
-    adam_args (AdamWArgs | None, optional):
+    adamw_args (AdamWArgs | None, optional):
         AdamW configuration dataclass. If None, default values
         from AdamW are used.
 
