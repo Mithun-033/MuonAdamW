@@ -7,7 +7,7 @@ A hybrid optimizer that combines [Muon](https://github.com/KellerJordan/Muon) an
 ---
 
 ## Optimizer definition
-'''python
+```python
 
 from MuonAdamW import MuonAdamW, MuonArgs, AdamwArgs
 
@@ -27,7 +27,7 @@ optimizer = MuonAdamW(
     muon_args = muon_args
 )
 
-'''
+```
 
 ## Motivation
 
