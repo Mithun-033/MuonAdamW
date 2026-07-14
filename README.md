@@ -71,10 +71,7 @@ optimizer.load_state_dict(torch.load("checkpoint.pt"))
 
 ## Known Limitations (Beta)
 
-- **LR schedulers** — passing `MuonAdamW` to `torch.optim.lr_scheduler.*` will not update sub-optimizer LRs. Workaround: step schedulers on `optimizer.adamw` and `optimizer.muon` directly.
 - **`optimizer.state`** — always empty; state lives in the sub-optimizers. Use `state_dict()` for inspection.
-- Duplicate parameter deduplication fix in progress for `transformer` and `cnn` modes.
-
 ---
 
 ## Roadmap
