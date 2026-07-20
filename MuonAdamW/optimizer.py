@@ -120,10 +120,10 @@ class MuonAdamW(optim.Optimizer):
         self.adamw.load_state_dict(state_dict['adamw'])
         self.muon.load_state_dict(state_dict['muon'])
 
-    def add_param_group(self, param_group):
-        assert "muon" in param_group and "adamw" in param_group, "Param group must contain both 'muon' and 'adamw' keys."
-        self.muon.add_param_group(param_group["muon"])
-        self.adamw.add_param_group(param_group["adamw"])
+    # def add_param_group(self, param_group):
+    #     assert "muon" in param_group and "adamw" in param_group, "Param group must contain both 'muon' and 'adamw' keys."
+    #     self.muon.add_param_group(param_group["muon"])
+    #     self.adamw.add_param_group(param_group["adamw"])
 
 MuonAdamW.__doc__ = r'''
 Implementation of the MuonAdamW optimizer, which combines AdamW and Muon.
