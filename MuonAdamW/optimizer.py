@@ -14,7 +14,7 @@ Modes :-
         The user must provide two lists of parameters: one for Muon and one for AdamW.
 
 '''
-from typing import Literal
+from typing import Iterator, Literal
 from torch import nn
 import torch.optim as optim
 from .arguments import AdamwArgs,MuonArgs
@@ -26,8 +26,8 @@ class MuonAdamW(optim.Optimizer):
                 model : nn.Module,
                 lr : float = 1e-3,
                 mode : Literal["general","transformer","custom"]="general",
-                muon_parameters : list[nn.Parameter] | None = None,
-                adamw_parameters : list[nn.Parameter] | None = None,
+                muon_parameters : list[nn.Parameter] | Iterator |None = None,
+                adamw_parameters : list[nn.Parameter] | Iterator |None = None,
                 adamw_args : AdamwArgs | None = None,
                 muon_args : MuonArgs | None = None,
                 muon_lr_multiplier : Literal["original","match_rms_adamw"] | float = "original",
@@ -51,8 +51,8 @@ class MuonAdamW(optim.Optimizer):
         if self.mode == "custom":
             if muon_parameters is None or adamw_parameters is None:
                 raise ValueError("For custom mode, both muon_parameters and adamw_parameters must be provided in a list format.")
-            self.muon_params = muon_parameters
-            self.adamw_params = adamw_parameters
+            self.muon_params = list(muon_parameters)
+            self.adamw_params = list(adamw_parameters)
 
         elif self.mode == "general":
             for param in model.parameters():
