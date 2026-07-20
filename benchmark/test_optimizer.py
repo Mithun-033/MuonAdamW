@@ -13,9 +13,9 @@ class TestMuonAdamW(unittest.TestCase):
         self.assertIsInstance(optimizer, MuonAdamW)
         
         # Test with custom parameters
-        adam_args = AdamwArgs(betas=(0.8, 0.88), eps=1e-6)
+        adamw_args = AdamwArgs(betas=(0.8, 0.88), eps=1e-6)
         muon_args = MuonArgs(weight_decay=0.05, momentum=0.9)
-        optimizer = MuonAdamW(model, mode="transformer", muon_lr_multiplier="match_rms_adamw", adam_args=adam_args, muon_args=muon_args)
+        optimizer = MuonAdamW(model, mode="transformer", muon_lr_multiplier="match_rms_adamw", adamw_args=adamw_args, muon_args=muon_args)
         self.assertIsInstance(optimizer, MuonAdamW)
 
     def test_invalid_mode(self):
@@ -36,8 +36,18 @@ class TestMuonAdamW(unittest.TestCase):
     def test_custom_mode_with_parameters(self):
         model = nn.Linear(10, 1)
         muon_params = [param for param in model.parameters() if param.dim() > 1]
-        adam_params = [param for param in model.parameters() if param.dim() == 1]
-        optimizer = MuonAdamW(model, mode="custom", muon_parameters=muon_params, adam_parameters=adam_params)
+        adamw_params = [param for param in model.parameters() if param.dim() == 1]
+        optimizer = MuonAdamW(model, mode="custom", muon_parameters=muon_params, adamw_parameters=adamw_params)
+        self.assertIsInstance(optimizer, MuonAdamW)
+
+    def test_custom_mode_with_model_iterator(self):
+        model = nn.Sequential(
+            nn.Linear(10, 5, bias = False),
+            nn.ReLU(),
+            nn.Linear(5, 1),
+            nn.LayerNorm(1)
+        )
+        optimizer = MuonAdamW(model, mode="custom", muon_parameters=model[0].parameters(), adamw_parameters=model[3].parameters())
         self.assertIsInstance(optimizer, MuonAdamW)
 
     def test_parameter_grouping_transformer(self):
